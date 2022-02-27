@@ -1,0 +1,35 @@
+version: '3'
+services:
+
+  bot:
+    build: ./bot
+    env_file:
+      - env/bot.env
+    volumes: 
+      - ./bot:/bot
+    command: [ "python", "-m", "avibot.__main__"]
+
+  redis:
+    image: redis:7.0-rc1
+    env_file:
+      - env/redis.env
+    ports:
+      - "6379:6379"
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
+
+  postgres:
+    image: postgres:14.2
+    env_file:
+      - env/postgres.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-volume:/var/lib/postgresql/data
+    # restart: always
+
+volumes:
+  postgres-volume:
+  redis-data:
