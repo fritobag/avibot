@@ -1,1 +1,2 @@
-from avibot.core.bot import Bot
+from .bot import command, group, Bot
+from .cog_base import Cog
