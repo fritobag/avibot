@@ -10,7 +10,6 @@ python = "^3.10"
 "discord.py" = "^1.7.3"
 pytchat = "^0.5.5"
 tweepy = "^4.6.0"
-twitchio = "^2.1.5"
 
 [tool.poetry.dev-dependencies]
 

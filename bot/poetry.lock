@@ -183,14 +183,6 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
-name = "iso8601"
-version = "1.0.2"
-description = "Simple module to parse ISO 8601 dates"
-category = "main"
-optional = false
-python-versions = ">=3.6.2,<4.0"
-
-[[package]]
 name = "multidict"
 version = "6.0.2"
 description = "multidict implementation"
@@ -297,19 +289,6 @@ socks = ["requests[socks] (>=2.27.0,<3)"]
 test = ["vcrpy (>=1.10.3)"]
 
 [[package]]
-name = "twitchio"
-version = "2.1.5"
-description = "An asynchronous Python IRC and API wrapper for Twitch."
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-aiohttp = ">=3.6.0,<3.8.0"
-iso8601 = "*"
-typing-extensions = "*"
-
-[[package]]
 name = "typing-extensions"
 version = "4.1.1"
 description = "Backported and Experimental Type Hints for Python 3.6+"
@@ -345,7 +324,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "5ed7a688b13546e6641b741d03b7af51ad555ed2a3cdc9f415284800df1f29e9"
+content-hash = "3124c26941c129827d2ad028032c3b5c9e2bd7a36a8de4f6e702b71523523ba5"
 
 [metadata.files]
 aiohttp = [
@@ -443,10 +422,6 @@ idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
     {file = "idna-3.3.tar.gz", hash = "sha256:9d643ff0a55b762d5cdb124b8eaa99c66322e2157b69160bc32796e824360e6d"},
 ]
-iso8601 = [
-    {file = "iso8601-1.0.2-py3-none-any.whl", hash = "sha256:d7bc01b1c2a43b259570bb307f057abc578786ea734ba2b87b836c5efc5bd443"},
-    {file = "iso8601-1.0.2.tar.gz", hash = "sha256:27f503220e6845d9db954fb212b95b0362d8b7e6c1b2326a87061c3de93594b1"},
-]
 multidict = [
     {file = "multidict-6.0.2-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:0b9e95a740109c6047602f4db4da9949e6c5945cefbad34a1299775ddc9a62e2"},
     {file = "multidict-6.0.2-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:ac0e27844758d7177989ce406acc6a83c16ed4524ebc363c1f748cba184d89d3"},
@@ -534,10 +509,6 @@ sniffio = [
 tweepy = [
     {file = "tweepy-4.6.0-py2.py3-none-any.whl", hash = "sha256:bd1f06755ed0a115b106bff0f8c8df0a85f9431b898de555abb9ef96aa65439f"},
     {file = "tweepy-4.6.0.tar.gz", hash = "sha256:87f7ea18bdaf5896158b17e677b271c9b9772eb8917ae895895d77783b6d3176"},
-]
-twitchio = [
-    {file = "twitchio-2.1.5-py3-none-any.whl", hash = "sha256:90063d8377ea009695f11ae872dbde2a1a01d119fc8fe924ba6d801e9d9432b6"},
-    {file = "twitchio-2.1.5.tar.gz", hash = "sha256:c4860d4b4d8a61fa1ff8c293c9d8f3483c55aad2232f47b79f28726661eea4ff"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.1.1-py3-none-any.whl", hash = "sha256:21c85e0fe4b9a155d0799430b0ad741cdce7e359660ccbd8b530613e8df88ce2"},
