@@ -1,1 +1,1 @@
-from .core import bot, checks, Cog, command, context, errors, group, logger
+from .core import bot, checks, Cog, command, context, exceptions, group, logger
