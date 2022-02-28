@@ -25,9 +25,11 @@ class CogManager(Cog):
             else:
                 ctx.bot.load_extension(extension)
         except Exception as e:
-            print(f"Error when loading extension {name}")
+            self.logger.error(f"Error when loading extension {name}")
         else:
-            print(f"Extension {name} {'reloaded' if was_loaded else 'loaded'}")
+            self.logger.info(
+                f"Extension {name} {'reloaded' if was_loaded else 'loaded'}"
+            )
 
 
 def setup(bot: Bot):

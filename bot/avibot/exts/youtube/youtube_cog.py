@@ -47,7 +47,6 @@ class Youtube(Cog):
                 continue
             if not channel.permissions_for(guild.me).manage_webhooks:
                 continue
-            print(guild.name, channel.name)
             webhooks = await channel.webhooks()
             if webhooks:
                 self.webhooks[channel.id] = webhooks[0]
@@ -75,14 +74,14 @@ class Youtube(Cog):
             try:
                 await self.start_chat()
             except Exception as e:
-                print(f"{type(e)}{str(e)}")
+                self.logger.error(f"{type(e)}{str(e)}")
 
     async def start_chat(self) -> None:
         """Start new chat if possible."""
         try:
             video_id = await self.fetch_video_id()
         except exceptions.StreamNotOnline:
-            print("Stream is offline.")
+            self.logger.info("Stream is offline.")
             await asyncio.sleep(120)
             return
         livechat = LiveChatAsync(
@@ -95,7 +94,7 @@ class Youtube(Cog):
         try:
             livechat._task_finished()
         except CancelledError:
-            print("Youtube chat was cancelled.")
+            self.logger.error("Youtube chat was cancelled.")
 
     async def on_message_handler(self, chat_data) -> None:
         """Handler for the on_message event."""

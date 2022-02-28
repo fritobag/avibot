@@ -1,3 +1,4 @@
+import logging
 import os
 
 import aiohttp
@@ -18,6 +19,9 @@ class Bot(commands.Bot):
         self.core_dir = os.path.dirname(os.path.realpath(__file__))
         self.bot_dir = os.path.dirname(self.core_dir)
         self.ext_dir = os.path.join(self.bot_dir, "exts")
+        self.data_dir = os.path.join(self.bot_dir, "data")
+
+        self.logger = logging.getLogger("avibot.Bot")
 
         super().__init__(command_prefix=self.prefix, *kwargs)
         self.loop.run_until_complete(self._create_session())
@@ -49,19 +53,20 @@ class Bot(commands.Bot):
 
     async def on_message(self, message):
         """Handle on_message event."""
-        print(message.author, message.content)
+
+        self.logger.info((message.author, message.content))
         await self.process_commands(message)
 
     async def on_connect(self):
         """Handle on_connect event."""
-        print("avibot connected.")
+        self.logger.info("avibot connected")
         status = discord.Status.idle
         activity = discord.Game(name="Fighting")
         await self.change_presence(status=status, activity=activity)
 
     async def on_ready(self):
         """Handle on_ready event."""
-        print("avibot ready.")
+        self.logger.info("avibot is ready")
 
         for ext in self.preload_ext:
             ext_name = "avibot.exts." + ext

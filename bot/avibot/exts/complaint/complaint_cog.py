@@ -32,9 +32,8 @@ class Complaint(Cog):
     async def complaint(self, ctx, *, msg):
         """Sends a complaint to Avilo"""
         if not self.email:
-            print("Error: Empty email.")
+            self.logger.error("Error: Empty email.")
             return
-        print("sent", self.email)
 
         headers = {"User-Agent": random.choice(self.USER_AGENT_LIST)}
         n = 0xA ** (0xA - 0x1) + math.floor(random.random() * 0xA ** 0xA)
