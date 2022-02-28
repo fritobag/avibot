@@ -136,7 +136,7 @@ class Youtube(Cog):
         await webhook.send(
             (
                 f"Avilo {info}!\nLinks: "
-                "[youtube](<https://www.youtube.com/avilosoamaze/live>), "
+                "[youtube](<https://www.youtube.com/avilosoamaze/live>) "
                 "and [twitch](<https://twitch.tv/avilo>)"
             ),
             username=self.bot.name,
