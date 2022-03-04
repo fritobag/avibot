@@ -11,6 +11,8 @@ python = "^3.10"
 pytchat = "^0.5.5"
 tweepy = "^4.6.0"
 twitchio = "^2.1.5"
+pytest = "^7.0.1"
+pytest-cov = "^3.0.0"
 
 [tool.poetry.dev-dependencies]
 
