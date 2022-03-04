@@ -36,7 +36,7 @@ class Complaint(Cog):
             return
 
         headers = {"User-Agent": random.choice(self.USER_AGENT_LIST)}
-        n = 0xA ** (0xA - 0x1) + math.floor(random.random() * 0xA ** 0xA)
+        n = 0xA ** (0xA - 0x1) + math.floor(random.random() * 0xA**0xA)
         v = base64.b64encode(hex(n)[2:].encode("utf-8")).decode("utf-8")
 
         payload = {
