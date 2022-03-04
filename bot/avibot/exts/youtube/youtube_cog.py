@@ -11,6 +11,72 @@ from . import exceptions
 from .livechat import LiveChatAsync
 
 
+class Parser:
+    VIDEOID_REGEX = re.compile(r"\"videoId\"\:\"([\w\d\-\_]+)\"")
+    TITLE_REGEX = re.compile(
+        r"{\"title\":{\"runs\":\[{\"text\":\"(?P<title>.{1,80})\"}\]\}"
+    )
+    INFO_REGEX = re.compile(r"\"dateText\"\:\{\"simpleText\":\"([\w\s,.]+)\"\}")
+    COUNT_REGEX = re.compile(
+        (
+            r"{\"viewCount\":{\"runs\":\[\{\"text\":\"(\d*)\"\}"
+            r",\{\"text\":\"([\w\s]*)\"\}\]\}"
+        )
+    )
+    LIKES_REGEX = re.compile(r"\{\"label\":\"\d* likes\"\}\},\"simpleText\":\"(\d*)\"}")
+    COUNTDOWN_REGEX = re.compile(
+        (
+            r"\"mainText\":\{\"runs\":\[\{\"text\":\"([\s\w]*)\"\}"
+            r",\{\"text\":\"([\s\w]*)\"\}\]\}"
+        )
+    )
+
+    def __init__(self, text: str):
+        self.text = text
+        self._info = ""
+        self._is_live = False
+        self.checked = False
+
+    def title(self) -> str:
+        if not self.is_live():
+            return ""
+        match = self.TITLE_REGEX.search(self.text)
+        return match.group("title") if match else ""
+
+    def is_live(self) -> bool:
+        if self.checked:
+            return self._is_live
+        self.checked = True
+
+        self._info = self.info()
+        if self._info:
+            self._is_live = True
+            return True
+        return False
+
+    def info(self) -> str:
+        if self._info:
+            return self._info
+        match = self.INFO_REGEX.search(self.text)
+        return match.group(1) if match else ""
+
+    def count(self) -> str:
+        match = self.COUNT_REGEX.search(self.text)
+        return match.group(1) + match.group(2) if match else ""
+
+    def likes(self) -> str:
+        match = self.LIKES_REGEX.search(self.text)
+        return match.group(1) if match else ""
+
+    def countdown(self) -> str:
+        match = self.COUNTDOWN_REGEX.search(self.text)
+        return match.group(1) + match.group(2) if match else ""
+
+    def video_id(self) -> str:
+        match = self.VIDEOID_REGEX.search(self.text)
+        return match.group(1) if match else ""
+
+
 class Youtube(Cog):
     VIDEOID_REGEX = re.compile(r"\"videoId\"\:\"([\w\d\-\_]+)\"")
     INFO_REGEX = re.compile(r"\"dateText\"\:\{\"simpleText\":\"([\w\s,.]+)\"\}")
@@ -60,13 +126,10 @@ class Youtube(Cog):
         """Fetch video id without the youtube api."""
         async with self.bot.session.get(self.URL, headers=self.HEADERS) as response:
             response_text = await response.text()
-        match = self.INFO_REGEX.search(response_text)
-        if match is None:
+        p = Parser(response_text)
+        if not p.is_live():
             raise exceptions.StreamNotOnline
-        match = self.VIDEOID_REGEX.search(response_text)
-        if match:
-            return match.group(1)
-        raise exceptions.VideoIDNotFound
+        return p.video_id()
 
     async def youtube_chat(self) -> None:
         """Youtube chat main loop."""
@@ -78,12 +141,20 @@ class Youtube(Cog):
 
     async def start_chat(self) -> None:
         """Start new chat if possible."""
+        if not self.webhooks:
+            self.should_run = False
+            self.cog_unload()
+
         try:
             video_id = await self.fetch_video_id()
         except exceptions.StreamNotOnline:
             self.logger.info("Stream is offline.")
-            await asyncio.sleep(120)
+            await asyncio.sleep(90)
             return
+
+        for channel_id, webhook in self.webhooks.copy().items():
+            await self.send_youtube_status(channel_id, webhook)
+
         livechat = LiveChatAsync(
             video_id,
             callback=self.on_message_handler,
@@ -105,39 +176,61 @@ class Youtube(Cog):
             user = c.author
             username = user.name if not user.isChatModerator else user.name + " 🔧"
             for channel_id, webhook in self.webhooks.copy().items():
-                try:
-                    await webhook.send(
-                        content=message, username=username, avatar_url=user.imageUrl
-                    )
-                except discord.errors.NotFound:
-                    self.webhooks.pop(channel_id)
+                await self.safe_send(
+                    channel_id,
+                    webhook,
+                    content=message,
+                    username=username,
+                    avatar_url=user.imageUrl,
+                )
             await chat_data.tick_async()
+
+    async def safe_send(self, channel_id, webhook, *args, **kwargs) -> None:
+        """Remove webhook if it fails."""
+        try:
+            await webhook.send(*args, **kwargs)
+        except discord.errors.NotFound:
+            self.webhooks.pop(channel_id)
 
     def cog_unload(self):
         """Unload cog."""
         self.should_run = False
         self.event.set()
+        self.logger.info(f"Unload {self.__class__.__name__} cog.")
+
+    def compose_youtube_status(self, response_text: str) -> str:
+        """Compose youtube status."""
+        p = Parser(response_text)
+
+        info = p.info() if p.is_live() else "is too busy spamming his girlfriend"
+        info = info[0].lower() + info[1:]
+        countdown = p.countdown()
+        countdown = f". {countdown}" if countdown else ""
+        title = p.title() + "\n" if p.is_live() else ""
+        likes = f", {p.likes()} likes"
+        status = f" ({p.count()}{likes})" if p.is_live() else ""
+        return (
+            f"Avilo {info}{countdown}! {status}\n{title}"
+            "Links: [youtube](<https://www.youtube.com/avilosoamaze/live>) "
+            "and [twitch](<https://twitch.tv/avilo>)"
+        )
+
+    async def send_youtube_status(self, channel_id, webhook) -> None:
+        """Send youtube status."""
+        async with self.bot.session.get(self.URL, headers=self.HEADERS) as response:
+            response_text = await response.text()
+
+        message = self.compose_youtube_status(response_text)
+        await self.safe_send(
+            channel_id,
+            webhook,
+            content=message,
+            username=self.bot.name,
+            avatar_url=self.bot.avatar,
+        )
 
     @command()
     async def stream(self, ctx):
         """Check if avilo is streaming."""
-        async with ctx.session.get(self.URL, headers=self.HEADERS) as response:
-            response_text = await response.text()
-
-        match = self.INFO_REGEX.search(response_text)
-        if match:
-            info = match.group(1)
-            info = info[0].lower() + info[1:]
-        else:
-            info = "is too busy spamming his girlfriend"
-
         webhook = await ctx.webhook
-        await webhook.send(
-            (
-                f"Avilo {info}!\nLinks: "
-                "[youtube](<https://www.youtube.com/avilosoamaze/live>) "
-                "and [twitch](<https://twitch.tv/avilo>)"
-            ),
-            username=self.bot.name,
-            avatar_url=self.bot.avatar,
-        )
+        await self.send_youtube_status(None, webhook)
