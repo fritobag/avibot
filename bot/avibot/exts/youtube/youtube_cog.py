@@ -62,11 +62,11 @@ class Parser:
 
     def count(self) -> str:
         match = self.COUNT_REGEX.search(self.text)
-        return match.group(1) + match.group(2) if match else ""
+        return match.group(1) + match.group(2) if match else "0 viewers"
 
     def likes(self) -> str:
         match = self.LIKES_REGEX.search(self.text)
-        return match.group(1) if match else ""
+        return match.group(1) if match else "0"
 
     def countdown(self) -> str:
         match = self.COUNTDOWN_REGEX.search(self.text)
