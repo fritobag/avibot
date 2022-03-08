@@ -4,14 +4,16 @@ import os
 import aiohttp
 import discord
 from discord.ext import commands
+import dataclasses
 
 from avibot.config import Config
 from avibot.core.context import Context
+from discord import app_commands
+from avibot.core.database import DatabaseInterface
 
 
 class Bot(commands.Bot):
     def __init__(self, config: Config, **kwargs):
-
         self.config = config
         self.prefix = config.bot.prefix
         self.preload_ext = config.bot.preload_ext
@@ -22,12 +24,14 @@ class Bot(commands.Bot):
         self.data_dir = os.path.join(self.bot_dir, "data")
 
         self.logger = logging.getLogger("avibot.Bot")
-
         super().__init__(command_prefix=self.prefix, **kwargs)
 
     async def setup_hook(self):
         """Create a main aiohttp session."""
         self.session = aiohttp.ClientSession(loop=self.loop)
+        db_options = dataclasses.asdict(self.config.database)
+        self.dbi = DatabaseInterface(**db_options)
+        await self.dbi.create_database()
 
     async def close(self):
         """Implement close logic."""
@@ -47,7 +51,7 @@ class Bot(commands.Bot):
     async def on_message(self, message):
         """Handle on_message event."""
 
-        self.logger.info((message.author, message.content))
+        self.logger.debug((message.author, message.content))
         await self.process_commands(message)
 
     async def on_connect(self):
@@ -71,6 +75,11 @@ class Bot(commands.Bot):
             snowflake_guild = discord.Object(id=guild.id)
             self.tree.copy_global_to(guild=snowflake_guild)
             await self.tree.sync(guild=snowflake_guild)
+
+        for guild in self.guilds:
+            await self.tree.sync(guild=discord.Object(id=guild.id))
+
+        # await self.dbi.create_database()
 
     def run(self):
         """Overide run function."""
