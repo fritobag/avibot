@@ -7,12 +7,15 @@ license = "GNU 3.0"
 
 [tool.poetry.dependencies]
 python = "^3.10"
-"discord.py" = "^1.7.3"
+"discord.py" = { git = "https://github.com/Rapptz/discord.py.git" }
 pytchat = "^0.5.5"
 tweepy = "^4.6.0"
 twitchio = "^2.1.5"
 pytest = "^7.0.1"
 pytest-cov = "^3.0.0"
+SQLAlchemy = "^1.4.32"
+aiosqlite = "^0.17.0"
+asyncpg = "^0.25.0"
 
 [tool.poetry.dev-dependencies]
 

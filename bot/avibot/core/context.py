@@ -11,14 +11,15 @@ class Context(commands.Context):
 
     @property
     async def webhook(self):
-        if self.channel.permissions_for(self.guild.me).manage_webhooks:
-            webhooks = await self.channel.webhooks()
+        if self.channel and self.guild:
+            if self.channel.permissions_for(self.guild.me).manage_webhooks:
+                webhooks = await self.channel.webhooks()
 
-            if webhooks:
-                webhook = webhooks[0]
-            else:
-                avatar = await self.bot.avatar.read()
-                webhook = await self.channel.create_webhook(
-                    name=self.bot.name, avatar=avatar
-                )
-            return webhook
+                if webhooks:
+                    webhook = webhooks[0]
+                else:
+                    avatar = await self.bot.avatar.read()
+                    webhook = await self.channel.create_webhook(
+                        name=self.bot.name, avatar=avatar
+                    )
+                return webhook

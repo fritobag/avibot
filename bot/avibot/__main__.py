@@ -1,15 +1,17 @@
-from avibot.core import Bot
-from avibot.config import Config
+import discord
+
 from avibot import logger
+from avibot.config import Config
+from avibot.core import Bot
 
 
 def main() -> None:
     config = Config()
-    avibot = Bot(config=config)
+
+    intents = discord.Intents.all()
+    avibot = Bot(config=config, intents=intents)
 
     logger.init_logger(avibot)
-    avibot.load_extension("avibot.core.cog_manager")
-
     avibot.run()
 
 

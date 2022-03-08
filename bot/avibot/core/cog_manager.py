@@ -24,7 +24,7 @@ class CogManager(Cog):
                 ctx.bot.reload_extension(extension)
             else:
                 ctx.bot.load_extension(extension)
-        except Exception as e:
+        except Exception:
             self.logger.error(f"Error when loading extension {name}")
         else:
             self.logger.info(
@@ -32,5 +32,5 @@ class CogManager(Cog):
             )
 
 
-def setup(bot: Bot):
-    bot.add_cog(CogManager(bot))
+async def setup(bot: Bot):
+    await bot.add_cog(CogManager(bot))

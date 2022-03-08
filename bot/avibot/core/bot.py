@@ -10,7 +10,7 @@ from avibot.core.context import Context
 
 
 class Bot(commands.Bot):
-    def __init__(self, config: Config, *kwargs):
+    def __init__(self, config: Config, **kwargs):
 
         self.config = config
         self.prefix = config.bot.prefix
@@ -23,18 +23,11 @@ class Bot(commands.Bot):
 
         self.logger = logging.getLogger("avibot.Bot")
 
-        super().__init__(command_prefix=self.prefix, *kwargs)
-        self.loop.run_until_complete(self._create_session())
+        super().__init__(command_prefix=self.prefix, **kwargs)
 
-    async def _create_session(self):
+    async def setup_hook(self):
         """Create a main aiohttp session."""
         self.session = aiohttp.ClientSession(loop=self.loop)
-
-    async def shutdown(self):
-        """Implement shutdown logic."""
-        await self.logout()
-        if self.session:
-            await self.session.close()
 
     async def close(self):
         """Implement close logic."""
@@ -68,9 +61,16 @@ class Bot(commands.Bot):
         """Handle on_ready event."""
         self.logger.info("avibot is ready")
 
+        await self.load_extension("avibot.core.cog_manager")
+
         for ext in self.preload_ext:
             ext_name = "avibot.exts." + ext
-            self.load_extension(ext_name)
+            await self.load_extension(ext_name)
+
+        for guild in self.guilds:
+            snowflake_guild = discord.Object(id=guild.id)
+            self.tree.copy_global_to(guild=snowflake_guild)
+            await self.tree.sync(guild=snowflake_guild)
 
     def run(self):
         """Overide run function."""
@@ -78,11 +78,13 @@ class Bot(commands.Bot):
 
     @property
     def name(self):
-        return self.user.name
+        return self.user.name if self.user else None
 
     @property
     def avatar(self):
-        return self.user.avatar_url_as(static_format="png")
+        if self.user and self.user.avatar:
+            if self.user.avatar:
+                return self.user.avatar.replace(format="png")
 
 
 def command(*args, **kwargs):
