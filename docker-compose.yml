@@ -8,6 +8,9 @@ services:
       - env/postgres.env
     volumes: 
       - ./bot:/bot
+    depends_on:
+      postgres:
+        condition: service_healthy
     command: [ "python", "-m", "avibot.__main__"]
 
   redis:
@@ -30,6 +33,11 @@ services:
     volumes:
       - postgres-volume:/var/lib/postgresql/data
     restart: always
+    healthcheck:
+      test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h $$POSTGRES_HOST
+      interval: 5s
+      timeout: 2s
+      retries: 10
 
 volumes:
   postgres-volume:
