@@ -31,7 +31,6 @@ class Bot(commands.Bot):
         self.session = aiohttp.ClientSession(loop=self.loop)
         db_options = dataclasses.asdict(self.config.database)
         self.dbi = DatabaseInterface(**db_options)
-        await self.dbi.create_database()
 
     async def close(self):
         """Implement close logic."""
@@ -70,6 +69,8 @@ class Bot(commands.Bot):
         for ext in self.preload_ext:
             ext_name = "avibot.exts." + ext
             await self.load_extension(ext_name)
+
+        await self.dbi.create_database()
 
         for guild in self.guilds:
             snowflake_guild = discord.Object(id=guild.id)
