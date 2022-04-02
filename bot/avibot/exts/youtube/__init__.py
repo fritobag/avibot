@@ -1,5 +1,5 @@
 from .youtube_cog import Youtube
 
 
-def setup(bot):
-    bot.add_cog(Youtube(bot))
+async def setup(bot):
+    await bot.add_cog(Youtube(bot))

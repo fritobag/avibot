@@ -1,5 +1,5 @@
 from .complaint_cog import Complaint
 
 
-def setup(bot):
-    bot.add_cog(Complaint(bot))
+async def setup(bot):
+    await bot.add_cog(Complaint(bot))

@@ -229,7 +229,7 @@ class Youtube(Cog):
             avatar_url=self.bot.avatar,
         )
 
-    @command()
+    @command(aliases=["strim"])
     async def stream(self, ctx):
         """Check if avilo is streaming."""
         webhook = await ctx.webhook
